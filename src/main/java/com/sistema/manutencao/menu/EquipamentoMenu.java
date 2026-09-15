@@ -7,6 +7,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
+/* Classe de Menu (CLI) de Equipamento
+Responsável por exibir as opções do submenu de Equipamentos no terminal, ler e validar a entrada do usuário e
+repassar os dados diretamente para a camada DAO, que realiza a persistência no banco
+*/
 public class EquipamentoMenu {
     private final EquipamentoDAO equipamentoDAO = new EquipamentoDAO();
     private final Scanner scanner;
@@ -16,6 +20,7 @@ public class EquipamentoMenu {
         this.scanner = scanner;
     }
 
+    // Método principal que exibe o submenu de Equipamentos em loop até o usuário optar por voltar
     public void exibirMenu() {
         boolean continuar = true;
 
@@ -39,6 +44,7 @@ public class EquipamentoMenu {
         }
     }
 
+    // Lê os dados do novo equipamento pelo terminal, valida os campos obrigatórios e envia para a DAO cadastrar
     private void cadastrarEquipamento() {
         System.out.println("\n--- Cadastro de Equipamento ---");
         try {
@@ -54,11 +60,13 @@ public class EquipamentoMenu {
             System.out.print("Localização: ");
             String localizacao = scanner.nextLine().trim();
 
+            // Validação básica de campos obrigatórios
             if (codigoPatrimonio.isBlank() || nome.isBlank() || localizacao.isBlank()) {
                 System.out.println(">> Código de patrimônio, nome e localização são obrigatórios.");
                 return;
             }
 
+            // Verifica se já existe um equipamento com o mesmo código de patrimônio
             if (equipamentoDAO.buscarEquipamentoPorCodigo(codigoPatrimonio) != null) {
                 System.out.println(">> Já existe um equipamento cadastrado com este código de patrimônio.");
                 return;
@@ -79,6 +87,7 @@ public class EquipamentoMenu {
         }
     }
 
+    // Busca e exibe a lista completa de equipamentos cadastrados em formato de tabela simples
     private void listarEquipamentos() {
         System.out.println("\n--- Lista de Equipamentos ---");
         try {
@@ -104,6 +113,7 @@ public class EquipamentoMenu {
         }
     }
 
+    // Solicita o ID do equipamento e exibe todos os seus detalhes
     private void visualizarEquipamento() {
         System.out.println("\n--- Visualizar Equipamento ---");
         try {

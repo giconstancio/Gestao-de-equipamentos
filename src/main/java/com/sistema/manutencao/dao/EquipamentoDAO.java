@@ -7,8 +7,14 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/* Classe DAO de Equipamento
+Responsável por realizar ações relacionadas aos equipamentos dentro do banco de dados, sendo a camada intermediária
+entre o banco e a classe Service
+*/
 public class EquipamentoDAO {
 
+    // Método de cadastro de Equipamento no banco de dados
+    // Recebe o objeto Equipamento como parâmetro e cadastra seus atributos no sistema
     public Equipamento cadastrarEquipamento(Equipamento e) {
         String sql = "INSERT INTO equipamentos(codigo_patrimonio, nome, descricao, localizacao) VALUES (?,?,?,?)";
 
@@ -24,13 +30,16 @@ public class EquipamentoDAO {
                 if (rs.next()) {
                     e.setIdEquipamento(rs.getInt(1));
                 }
-            } return e;
+            } return e; // Retorna o Equipamento cadastrado já com o ID atribuído
         } catch (Exception ex) {
             throw new RuntimeException("Erro ao cadastrar equipamento: " + ex);
         }
     }
 
+    // Método responsável por listar todos os equipamentos do sistema
+    // Retorna uma lista com os objetos dos Equipamentos completos
     public List<Equipamento> listarEquipamentos() {
+        // Ordenados por ordem alfabética
         String sql = "SELECT * FROM equipamentos ORDER BY nome";
 
         try (Connection conn = new DatabaseConnection().getConnection();
@@ -38,7 +47,7 @@ public class EquipamentoDAO {
              ResultSet rs = stmt.executeQuery()) {
             List<Equipamento> equipamentos = new ArrayList<>();
             while (rs.next()) {
-                equipamentos.add(mapRow(rs));
+                equipamentos.add(mapRow(rs)); // Adiciona cada um na lista que será retornada (com auxílio do método de conversão)
             }
             return equipamentos;
         } catch (Exception ex) {
@@ -46,7 +55,9 @@ public class EquipamentoDAO {
         }
     }
 
+    // Método responsável por listar apenas os equipamentos ativos do sistema
     public List<Equipamento> listarEquipamentosAtivos() {
+        // Ordenados por ordem alfabética
         String sql = "SELECT * FROM equipamentos WHERE ativo = TRUE ORDER BY nome";
 
         try (Connection conn = new DatabaseConnection().getConnection();
@@ -62,6 +73,7 @@ public class EquipamentoDAO {
         }
     }
 
+    // Método responsável por retornar o objeto completo do Equipamento com base no ID informado pelo parâmetro
     public Equipamento buscarEquipamentoPorId(int idEquipamento) {
         String sql = "SELECT * FROM equipamentos WHERE id = ?";
 
@@ -79,6 +91,8 @@ public class EquipamentoDAO {
         }
     }
 
+    // Método responsável por retornar o objeto completo do Equipamento com base no código de patrimônio informado
+    // Usado para validar duplicidade no cadastro
     public Equipamento buscarEquipamentoPorCodigo(String codigoPatrimonio) {
         String sql = "SELECT * FROM equipamentos WHERE codigo_patrimonio = ?";
 
@@ -96,6 +110,7 @@ public class EquipamentoDAO {
         }
     }
 
+    // Método de edição de atributos dos equipamentos
     public Equipamento editarEquipamento(Equipamento e) {
         String sql = "UPDATE equipamentos SET codigo_patrimonio=?, nome=?, descricao=?, localizacao=?, ativo=? WHERE id = ?";
 
@@ -114,6 +129,7 @@ public class EquipamentoDAO {
         }
     }
 
+    // Método de soft delete do Equipamento, tornando-o inativo dentro do sistema
     public void inativarEquipamento(int idEquipamento) {
         String sql = "UPDATE equipamentos SET ativo=false WHERE id = ?";
 
@@ -126,6 +142,8 @@ public class EquipamentoDAO {
         }
     }
 
+    // Método interno auxiliar para criação e mapeamento dos dados do Equipamento retornado por um ResultSet, ou seja,
+    // um objeto Equipamento com os valores obtidos pelo ResultSet
     private Equipamento mapRow(ResultSet rs) throws SQLException {
         Equipamento e = new Equipamento();
         e.setIdEquipamento(rs.getInt("id"));

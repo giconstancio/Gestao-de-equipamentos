@@ -2,6 +2,9 @@ package com.sistema.manutencao.model;
 
 import java.time.LocalDateTime;
 
+/* Classe Model de Equipamento
+Representa os dados de um equipamento cadastrado no sistema, refletindo os atributos da tabela "equipamentos"
+*/
 public class Equipamento {
     private int idEquipamento;
     private String codigoPatrimonio;
