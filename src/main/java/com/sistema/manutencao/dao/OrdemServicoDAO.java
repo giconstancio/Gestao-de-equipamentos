@@ -22,6 +22,7 @@ public class OrdemServicoDAO {
 
         try (Connection conn = new DatabaseConnection().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setInt(1, os.getEquipamentoId());
             stmt.setInt(2, os.getGestorAberturaId());
             stmt.setString(3, os.getDescricaoFalha());
@@ -32,7 +33,10 @@ public class OrdemServicoDAO {
                 if (rs.next()) {
                     os.setIdOrdemServico(rs.getInt(1));
                 }
-            } return os; // Retorna a Ordem de Serviço cadastrada já com o ID atribuído
+            }
+
+            return os; // Retorna a Ordem de Serviço cadastrada já com o ID atribuído
+
         } catch (Exception ex) {
             throw new RuntimeException("Erro ao abrir ordem de serviço: " + ex);
         }
@@ -44,9 +48,11 @@ public class OrdemServicoDAO {
 
         try (Connection conn = new DatabaseConnection().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, idTecnico);
             stmt.setInt(2, idOrdemServico);
             stmt.executeUpdate();
+
         } catch (Exception ex) {
             throw new RuntimeException("Erro ao atribuir técnico à ordem de serviço: " + ex);
         }
@@ -61,11 +67,15 @@ public class OrdemServicoDAO {
         try (Connection conn = new DatabaseConnection().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
+
             List<OrdemServico> ordens = new ArrayList<>();
+
             while (rs.next()) {
-                ordens.add(mapRow(rs)); // Adiciona cada uma na lista que será retornada (com auxílio do método de conversão)
+                ordens.add(mapRow(rs)); // Adiciona cada uma na lista que será retornada
             }
+
             return ordens;
+
         } catch (Exception ex) {
             throw new RuntimeException("Erro ao listar ordens de serviço: " + ex);
         }
@@ -77,14 +87,19 @@ public class OrdemServicoDAO {
 
         try (Connection conn = new DatabaseConnection().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, idTecnico);
+
             try (ResultSet rs = stmt.executeQuery()) {
                 List<OrdemServico> ordens = new ArrayList<>();
+
                 while (rs.next()) {
                     ordens.add(mapRow(rs));
                 }
+
                 return ordens;
             }
+
         } catch (Exception ex) {
             throw new RuntimeException("Erro ao listar ordens de serviço do técnico: " + ex);
         }
@@ -96,22 +111,56 @@ public class OrdemServicoDAO {
 
         try (Connection conn = new DatabaseConnection().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, idOrdemServico);
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return mapRow(rs);
                 }
+
                 return null;
             }
+
         } catch (Exception ex) {
             throw new RuntimeException("Erro ao buscar ordem de serviço por ID: " + ex);
         }
     }
 
-    // Método interno auxiliar para criação e mapeamento dos dados da Ordem de Serviço retornada por um ResultSet, ou
-    // seja, um objeto OrdemServico com os valores obtidos pelo ResultSet
+    // Método responsável por atualizar o status de uma Ordem de Serviço já existente.
+    // Caso o novo status seja CONCLUIDA, também registra automaticamente a data e a hora de conclusão.
+    public void atualizarStatus(int idOrdemServico, StatusOS novoStatus) {
+
+        String sql = "UPDATE ordens_servico SET status = ?, " +
+                "concluido_em = CASE WHEN ? = 'CONCLUIDA' " +
+                "THEN CURRENT_TIMESTAMP ELSE NULL END " +
+                "WHERE id = ?";
+
+        try (Connection conn = new DatabaseConnection().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, novoStatus.name());
+            stmt.setString(2, novoStatus.name());
+            stmt.setInt(3, idOrdemServico);
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            if (linhasAfetadas == 0) {
+                throw new IllegalArgumentException(
+                        "Ordem de serviço não encontrada para atualização de status.");
+            }
+
+        } catch (SQLException ex) {
+            throw new RuntimeException(
+                    "Erro ao atualizar status da ordem de serviço: " + ex);
+        }
+    }
+
+    // Método interno auxiliar para criação e mapeamento dos dados da Ordem de Serviço retornada por um ResultSet,
+    // ou seja, cria um objeto OrdemServico com os valores obtidos pelo banco de dados.
     private OrdemServico mapRow(ResultSet rs) throws SQLException {
         OrdemServico os = new OrdemServico();
+
         os.setIdOrdemServico(rs.getInt("id"));
         os.setEquipamentoId(rs.getInt("equipamento_id"));
 
