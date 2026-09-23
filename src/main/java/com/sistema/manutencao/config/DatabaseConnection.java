@@ -13,8 +13,15 @@ public class DatabaseConnection {
         "DB_URL", 
         "jdbc:mysql://localhost:3306/db_manutencao?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
     );
-    private static final String USER = getEnvOrDefault("DB_USER", "root");
-    private static final String PASSWORD = getEnvOrDefault("DB_PASSWORD", "root");
+
+    private static String user;
+    private static String password;
+
+    // Configura usuário e senha da conexão com o banco de dados
+    public static void configurar(String user, String password) {
+        DatabaseConnection.user = user;
+        DatabaseConnection.password = password;
+    }
 
     // Mantém a instância da conexão com o banco. Usamos 'static' para reaproveitar 
     // a mesma conexão em toda a aplicação
@@ -32,7 +39,7 @@ public class DatabaseConnection {
             // Verifica se a conexão é nula ou se foi encerrada anteriormente
             if (connection == null || connection.isClosed()) {
                 // Estabelece uma nova conexão usando o DriverManager e as credenciais configuradas
-                connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                connection = DriverManager.getConnection(URL, user, password);
             }
         } catch (SQLException e) {
             // Captura qualquer erro de SQL e lança 

@@ -18,7 +18,7 @@ public class UsuarioDAO {
     // Método de cadastro de Usuário no banco de dados
     // Recebe o objeto Usuário como parâmetro e cadastra seus atributos no sistema
     public Usuario cadastrarUsuario(Usuario u) {
-        String sql = "INSERT INTO usuarios(nome, email, senha, perfil) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO usuarios(nome, email, senha, perfil, status_tecnico) VALUES (?,?,?,?,?)";
 
         try(Connection conn = new DatabaseConnection().getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -155,6 +155,7 @@ public class UsuarioDAO {
         u.setIdUsuario(rs.getInt("id"));
         u.setNome(rs.getString("nome"));
         u.setEmail(rs.getString("email"));
+        u.setSenha(rs.getString("senha"));
         u.setPerfil(PerfilUsuario.valueOf(rs.getString("perfil")));
 
         String statusStr = rs.getString("status_tecnico");

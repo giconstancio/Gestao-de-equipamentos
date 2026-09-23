@@ -156,6 +156,95 @@ public class OrdemServicoDAO {
         }
     }
 
+    // Método responsável por listar as Ordens de Serviço de acordo com o status informado
+    public List<OrdemServico> listarPorStatus(StatusOS status) {
+        String sql = "SELECT * FROM ordens_servico WHERE status = ? ORDER BY aberto_em DESC";
+
+        try (Connection conn = new DatabaseConnection().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, status.name());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                List<OrdemServico> ordens = new ArrayList<>();
+
+                while (rs.next()) {
+                    ordens.add(mapRow(rs));
+                }
+
+                return ordens;
+            }
+
+        } catch (Exception ex) {
+            throw new RuntimeException(
+                    "Erro ao listar ordens de serviço por status: " + ex);
+        }
+    }
+
+
+    // Método responsável por atualizar o diagnóstico inicial e a causa-raiz
+// de uma Ordem de Serviço já existente
+    public void atualizarDiagnostico(
+            int idOrdemServico,
+            String diagnosticoInicial,
+            String causaRaiz) {
+
+        String sql = "UPDATE ordens_servico " +
+                "SET diagnostico_inicial = ?, causa_raiz = ? " +
+                "WHERE id = ?";
+
+        try (Connection conn = new DatabaseConnection().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, diagnosticoInicial);
+            stmt.setString(2, causaRaiz);
+            stmt.setInt(3, idOrdemServico);
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            if (linhasAfetadas == 0) {
+                throw new IllegalArgumentException(
+                        "Ordem de serviço não encontrada para atualização do diagnóstico.");
+            }
+
+        } catch (SQLException ex) {
+            throw new RuntimeException(
+                    "Erro ao atualizar diagnóstico da ordem de serviço: " + ex);
+        }
+    }
+
+
+    // Método responsável por atualizar as informações do reparo
+// de uma Ordem de Serviço já existente
+    public void atualizarReparo(
+            int idOrdemServico,
+            java.math.BigDecimal horasTrabalhadas,
+            String pecasUtilizadas) {
+
+        String sql = "UPDATE ordens_servico " +
+                "SET horas_trabalhadas = ?, pecas_utilizadas = ? " +
+                "WHERE id = ?";
+
+        try (Connection conn = new DatabaseConnection().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setBigDecimal(1, horasTrabalhadas);
+            stmt.setString(2, pecasUtilizadas);
+            stmt.setInt(3, idOrdemServico);
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            if (linhasAfetadas == 0) {
+                throw new IllegalArgumentException(
+                        "Ordem de serviço não encontrada para atualização do reparo.");
+            }
+
+        } catch (SQLException ex) {
+            throw new RuntimeException(
+                    "Erro ao atualizar reparo da ordem de serviço: " + ex);
+        }
+    }
+
     // Método interno auxiliar para criação e mapeamento dos dados da Ordem de Serviço retornada por um ResultSet,
     // ou seja, cria um objeto OrdemServico com os valores obtidos pelo banco de dados.
     private OrdemServico mapRow(ResultSet rs) throws SQLException {
