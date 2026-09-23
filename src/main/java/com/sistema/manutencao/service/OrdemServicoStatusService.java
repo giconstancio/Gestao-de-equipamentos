@@ -72,4 +72,14 @@ public class OrdemServicoStatusService {
         // Registra automaticamente a alteração realizada.
         historicoDAO.registrar(historico);
     }
+
+    public void registrarHistorico(int idOs, int usuarioId, String descricao, StatusOS anterior, StatusOS novo) {
+        Historico h = new Historico();
+        h.setOrdemServicoId(idOs);
+        h.setUsuarioId(usuarioId);
+        h.setDescricaoAcao(descricao);
+        h.setStatusAnterior(anterior);
+        h.setStatusNovo(novo);
+        historicoDAO.registrar(h);
+    }
 }

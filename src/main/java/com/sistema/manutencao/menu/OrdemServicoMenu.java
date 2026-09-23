@@ -214,7 +214,7 @@ public class OrdemServicoMenu {
         System.out.print("Intervenção realizada: ");
         String intervencao = scanner.nextLine().trim();
         if (intervencao.isBlank()) throw new IllegalArgumentException("Descreva a intervenção.");
-        osDao.atualizarReparo(os.getIdOrdemServico(), horas, pecas.isBlank() ? null : pecas, intervencao);
+        osDao.atualizarReparo(os.getIdOrdemServico(), horas, pecas.isBlank() ? null : pecas);
         statusService.registrarHistorico(os.getIdOrdemServico(), SessaoAtual.getUsuarioLogado().getIdUsuario(),
                 "Reparo executado: " + intervencao + ". Horas: " + horas + ". Peças/materiais: " + (pecas.isBlank() ? "nenhum" : pecas) + ".",
                 os.getStatus(), os.getStatus());
