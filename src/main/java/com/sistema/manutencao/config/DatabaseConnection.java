@@ -7,10 +7,10 @@ import java.sql.SQLException;
 public class DatabaseConnection {
 
     // Lê as credenciais e a URL do banco a partir de variáveis de ambiente
-    // O método auxiliar 'getEnvOrDefault' garante que, caso a variável não exista (por exemplo, ao rodar localmente), 
+    // O método auxiliar 'getEnvOrDefault' garante que, caso a variável não exista (por exemplo, ao rodar localmente),
     // o sistema utilize os valores padrões fornecidos (ex: "root", "jdbc:mysql://...")
     private static final String URL = getEnvOrDefault(
-        "DB_URL", 
+        "DB_URL",
         "jdbc:mysql://localhost:3306/db_manutencao?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
     );
 
@@ -23,32 +23,24 @@ public class DatabaseConnection {
         DatabaseConnection.password = password;
     }
 
-    // Mantém a instância da conexão com o banco. Usamos 'static' para reaproveitar 
-    // a mesma conexão em toda a aplicação
-    private static Connection connection = null;
-
     // Construtor vazio
     public DatabaseConnection() { }
 
     /**
-     * Retorna a conexão ativa com o banco de dados
-     * Caso a conexão ainda não exista ou tenha sido fechada, uma nova será estabelecida
+     * Abre e retorna uma NOVA conexão com o banco de dados a cada chamada
+     * Todas as DAOs usam a conexão dentro de um try-with-resources, que fecha a conexão ao final do bloco.
+     * Por isso não reaproveitamos uma única conexão estática: se ela fosse compartilhada, uma DAO poderia fechar
+     * a conexão que outra parte do sistema ainda está usando
      */
     public static Connection getConnection() {
         try {
-            // Verifica se a conexão é nula ou se foi encerrada anteriormente
-            if (connection == null || connection.isClosed()) {
-                // Estabelece uma nova conexão usando o DriverManager e as credenciais configuradas
-                connection = DriverManager.getConnection(URL, user, password);
-            }
+            // Estabelece uma nova conexão usando o DriverManager e as credenciais configuradas
+            return DriverManager.getConnection(URL, user, password);
         } catch (SQLException e) {
-            // Captura qualquer erro de SQL e lança 
+            // Captura qualquer erro de SQL e lança
             // uma RuntimeException, o que ajuda a identificar falhas graves de infraestrutura rapidamente
-            System.err.println("Erro ao conectar ao banco de dados: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new RuntimeException("Erro ao conectar ao banco de dados: " + e.getMessage(), e);
         }
-        // Retorna a conexão pronta para uso
-        return connection;
     }
 
     /**

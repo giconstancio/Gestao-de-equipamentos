@@ -26,6 +26,8 @@ public class UsuarioDAO {
             stmt.setString(2, u.getEmail());
             stmt.setString(3, u.getSenha());
             stmt.setString(4, u.getPerfil().name());
+            // Status (disponibilidade) só existe para técnicos; para gestores é gravado como NULL
+            stmt.setString(5, u.getStatus() != null ? u.getStatus().name() : null);
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {

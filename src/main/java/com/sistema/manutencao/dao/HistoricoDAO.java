@@ -26,8 +26,9 @@ public class HistoricoDAO {
             stmt.setInt(1, historico.getOrdemServicoId());
             stmt.setInt(2, historico.getUsuarioId());
             stmt.setString(3, historico.getDescricaoAcao());
-            stmt.setString(4, historico.getStatusAnterior().name());
-            stmt.setString(5, historico.getStatusNovo().name());
+            // O status anterior é nulo no primeiro registro (abertura da OS), por isso é gravado como NULL
+            stmt.setString(4, historico.getStatusAnterior() != null ? historico.getStatusAnterior().name() : null);
+            stmt.setString(5, historico.getStatusNovo() != null ? historico.getStatusNovo().name() : null);
 
             stmt.executeUpdate();
 

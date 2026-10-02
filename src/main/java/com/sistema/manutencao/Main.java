@@ -10,10 +10,16 @@ import com.sistema.manutencao.service.UsuarioService;
 import java.sql.Connection;
 import java.util.Scanner;
 
+/* Classe principal da aplicação (CLI)
+Responsável por solicitar as credenciais do MySQL, testar a conexão, controlar o fluxo de login/logout
+e exibir o menu principal, que direciona o usuário para os submenus de acordo com o seu perfil
+*/
 public class Main {
+    // Um único Scanner sobre System.in é compartilhado por todos os menus (fechar um Scanner fecharia o System.in)
     private static final Scanner scanner = new Scanner(System.in);
     private static final UsuarioService usuarioService = new UsuarioService();
 
+    // Ponto de entrada: configura e testa a conexão com o banco antes de liberar o login
     public static void main(String[] args) {
         System.out.println("==============================================");
         System.out.println("   SISTEMA DE GESTÃO DE MANUTENÇÃO");
@@ -27,6 +33,8 @@ public class Main {
 
         DatabaseConnection.configurar(dbUser, dbPassword);
 
+        // Abre uma conexão apenas para validar as credenciais; o try-with-resources a fecha logo em seguida
+
         try (Connection ignored = DatabaseConnection.getConnection()) {
             System.out.println(">> Conexão com o MySQL realizada com sucesso.");
         } catch (Exception e) {
@@ -39,6 +47,7 @@ public class Main {
         scanner.close();
     }
 
+    // Loop da tela de login: autentica o usuário, guarda-o na sessão e abre o menu principal até o logout
     private static void loginLoop() {
         while (true) {
             System.out.println("\n===== LOGIN =====");
@@ -69,6 +78,7 @@ public class Main {
         }
     }
 
+    // Menu principal exibido após o login; a opção 4 muda conforme o perfil (gestor ou técnico)
     private static void menuPrincipal() {
         EquipamentoMenu equipamentoMenu = new EquipamentoMenu(scanner);
         UsuarioMenu usuarioMenu = new UsuarioMenu(scanner);
@@ -110,6 +120,7 @@ public class Main {
         }
     }
 
+    // Extrai uma mensagem legível da exceção, descendo pelas causas quando a mensagem é técnica (ex.: "java.sql...")
     private static String mensagem(Exception e) {
         Throwable t = e;
         while (t.getCause() != null && (t.getMessage() == null || t.getMessage().startsWith("java."))) {

@@ -40,6 +40,7 @@ public class UsuarioService {
     // Método para cadastro de Usuário com validação de campos obrigatórios com auxílio de um método interno auxiliar
     public Usuario cadastrarUsuario(String nome, String email, String senha, PerfilUsuario perfil) {
         validarCamposObrigatorios(nome, email, senha, perfil);
+        validarEmailUnico(email, null);
 
         Usuario u = new Usuario();
         u.setNome(nome);
@@ -90,6 +91,16 @@ public class UsuarioService {
     // Método de edição de Usuário com validação de campos obrigatórios com auxílio de um método interno auxiliar
     public Usuario editarUsuario(Usuario u) {
         validarCamposObrigatorios(u.getNome(), u.getEmail(), u.getSenha(), u.getPerfil());
+        validarEmailUnico(u.getEmail(), u.getIdUsuario());
+
+        // Mantém o Status coerente com o Perfil caso ele tenha sido alterado na edição:
+        // gestores não possuem disponibilidade e técnicos sempre precisam de uma
+        if (u.getPerfil() == PerfilUsuario.GESTOR) {
+            u.setStatus(null);
+        } else if (u.getStatus() == null) {
+            u.setStatus(StatusUsuario.DISPONIVEL);
+        }
+
         return usuarioDAO.editarUsuario(u);
     }
 
@@ -126,6 +137,15 @@ public class UsuarioService {
         }
         if (perfil == null) {
             throw new IllegalArgumentException("Perfil é obrigatório");
+        }
+    }
+
+    // Método interno auxiliar que impede dois usuários com o mesmo email (a coluna é UNIQUE no banco)
+    // O parâmetro idIgnorado permite que, na edição, o próprio usuário mantenha o seu email atual
+    private void validarEmailUnico(String email, Integer idIgnorado) {
+        Usuario existente = usuarioDAO.buscarUsuarioPorEmail(email);
+        if (existente != null && (idIgnorado == null || existente.getIdUsuario() != idIgnorado)) {
+            throw new IllegalArgumentException("Já existe um usuário cadastrado com este email");
         }
     }
 }

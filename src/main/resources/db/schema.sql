@@ -1,4 +1,7 @@
-CREATE DATABASE IF NOT EXISTS db_manutencao;
+-- Garante que acentos (ex.: "Técnico") sejam gravados corretamente ao rodar o script pelo cliente mysql no Windows
+SET NAMES utf8mb4;
+
+CREATE DATABASE IF NOT EXISTS db_manutencao CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE db_manutencao;
 
 CREATE TABLE IF NOT EXISTS usuarios (
@@ -54,6 +57,7 @@ CREATE TABLE IF NOT EXISTS historico_intervencoes (
 );
 
 -- Usuários iniciais para teste (Senha padrão: 123456)
-INSERT INTO usuarios (nome, email, senha, perfil, status_tecnico) VALUES 
+-- INSERT IGNORE permite rodar o script novamente sem erro de email duplicado
+INSERT IGNORE INTO usuarios (nome, email, senha, perfil, status_tecnico) VALUES 
 ('Administrador Gestor', 'gestor@sistema.com', '123456', 'GESTOR', NULL),
 ('Carlos Técnico', 'tecnico@sistema.com', '123456', 'TECNICO', 'DISPONIVEL');

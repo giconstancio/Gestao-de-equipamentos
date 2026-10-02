@@ -73,6 +73,8 @@ public class OrdemServicoStatusService {
         historicoDAO.registrar(historico);
     }
 
+    // Registra uma ação no histórico da OS sem alterar o status (ex.: diagnóstico, apontamento de reparo, atribuição)
+    // O status anterior pode ser null quando não existe estado prévio (caso da abertura da OS)
     public void registrarHistorico(int idOs, int usuarioId, String descricao, StatusOS anterior, StatusOS novo) {
         Historico h = new Historico();
         h.setOrdemServicoId(idOs);

@@ -11,6 +11,8 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Classe principal usada pelo comando "mvn compile exec:java" -->
+        <exec.mainClass>com.sistema.manutencao.Main</exec.mainClass>
     </properties>
 
     <dependencies>
